@@ -8,6 +8,7 @@ import SegmentacionEmociones from "../components/proyecto/SegmentacionEmociones"
 import CrecimientoUsuario from "../components/proyecto/CrecimientoUsuario";
 import DemografiaUsuarios from "../components/proyecto/DemografiaUsuarios";
 import ActividadUsuario from "../components/proyecto/ActividadUsuario";
+import TablaTweets from "../components/proyecto/TablaTweets";
 
 const userStats = {
 	totalUsers: 25,
@@ -46,10 +47,11 @@ const ProyectoPage = () => {
 				</motion.div>
 
                 <TablaProyecto />
-                
+				<br />
+                <TablaTweets />
 				{/* USER CHARTS */}
 				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
-                    <SegmentacionEmociones />
+					<SegmentacionEmociones />
                     <CrecimientoUsuario />
                     <DemografiaUsuarios />
                     <ActividadUsuario />
