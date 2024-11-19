@@ -1,0 +1,179 @@
+import { useState, useEffect } from "react";
+import PropTypes from 'prop-types';
+import { motion } from "framer-motion";
+import { Search, MessageCircle, Heart, Repeat2, ChartNoAxesCombined } from "lucide-react";
+
+const TablaTweets = ({ tweets, users }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredTweets, setFilteredTweets] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortOrder, setSortOrder] = useState("desc");
+  const tweetsPerPage = 4;
+
+  useEffect(() => {
+    const sortedTweets = [...tweets].sort((a, b) => b.like_count - a.like_count);
+    setFilteredTweets(sortedTweets);
+  }, [tweets]);
+
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = tweets.filter(
+      (tweet) => tweet.raw_content.toLowerCase().includes(term)
+    );
+    const sortedFiltered = filtered.sort((a, b) => sortOrder === "asc" ? a.like_count - b.like_count : b.like_count - a.like_count);
+    setFilteredTweets(sortedFiltered);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const handleSort = (order) => {
+    const sortedTweets = [...filteredTweets].sort((a, b) => {
+      if (order === "asc") {
+        return a.like_count - b.like_count;
+      } else {
+        return b.like_count - a.like_count;
+      }
+    });
+    setFilteredTweets(sortedTweets);
+    setSortOrder(order);
+    setCurrentPage(1); // Reset to first page on sort
+  };
+
+  const indexOfLastTweet = currentPage * tweetsPerPage;
+  const indexOfFirstTweet = indexOfLastTweet - tweetsPerPage;
+  const currentTweets = filteredTweets.slice(indexOfFirstTweet, indexOfLastTweet);
+
+  const totalPages = Math.ceil(filteredTweets.length / tweetsPerPage);
+  const pagesToShow = 3;
+  const startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2));
+  const endPage = Math.min(totalPages, startPage + pagesToShow - 1);
+
+  const paginate = (pageNumber) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  const openTweet = (url) => {
+    window.open(url, '_blank');
+  };
+
+  const getUserInfo = (userId) => {
+    return users.find(user => user.twitter_id === userId) || {};
+  };
+
+  return (
+    <motion.div
+      className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+    >
+      <div className='flex justify-between items-center mb-6'>
+        <h2 className='text-xl font-semibold text-gray-100'>Tweets</h2>
+        <div className='flex items-center'>
+          <button
+            className='bg-gray-700 text-white rounded-lg px-3 py-2 mr-4 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            onClick={() => handleSort(sortOrder === "asc" ? "desc" : "asc")}
+          >
+            {sortOrder === "asc" ? "↑" : "↓"}
+          </button>
+          <div className='relative'>
+            <input
+              type='text'
+              placeholder='Search tweets...'
+              className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+            <Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
+          </div>
+        </div>
+      </div>
+
+      <div className='overflow-x-auto'>
+        {currentTweets.map((tweet) => {
+          const user = getUserInfo(tweet.user_id);
+          return (
+            <motion.div
+              key={tweet.tweet_id}
+              className='bg-gray-700 p-4 rounded-lg mb-4 cursor-pointer'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+              onClick={() => openTweet(tweet.url)}
+            >
+              <div className='flex items-center mb-2'>
+                <img src={user.profile_image_url} alt={user.username} className='w-10 h-10 rounded-full mr-3' />
+                <div>
+                  <div className='text-sm font-medium text-gray-100'>{user.displayname}</div>
+                  <div className='text-xs text-gray-400'>@{user.username}</div>
+                </div>
+              </div>
+              <div className='text-sm font-medium text-gray-100 mb-2'>{tweet.raw_content}</div>
+              <div className='flex justify-between text-gray-400 text-xs'>
+                <span className='flex items-center'><MessageCircle className='mr-1' /> {tweet.reply_count || 0}</span>
+                <span className='flex items-center'><Repeat2 className='mr-1' /> {tweet.retweet_count || 0}</span>
+                <span className='flex items-center'><Heart className='mr-1' /> {tweet.like_count || 0}</span>
+                <span className='flex items-center'><ChartNoAxesCombined className='mr-1' /> {tweet.view_count || 0}</span>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <div className='flex justify-center mt-4'>
+        <button
+          onClick={() => paginate(currentPage - 1)}
+          className='mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300'
+          disabled={currentPage === 1}
+        >
+          &lt;
+        </button>
+        {Array.from({ length: endPage - startPage + 1 }, (_, i) => (
+          <button
+            key={startPage + i}
+            onClick={() => paginate(startPage + i)}
+            className={`mx-1 px-3 py-1 rounded-lg ${currentPage === startPage + i ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-300'}`}
+          >
+            {startPage + i}
+          </button>
+        ))}
+        <button
+          onClick={() => paginate(currentPage + 1)}
+          className='mx-1 px-3 py-1 rounded-lg bg-gray-700 text-gray-300'
+          disabled={currentPage === totalPages}
+        >
+          &gt;
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+TablaTweets.propTypes = {
+  tweets: PropTypes.arrayOf(
+    PropTypes.shape({
+      tweet_id: PropTypes.string.isRequired,
+      raw_content: PropTypes.string.isRequired,
+      like_count: PropTypes.number.isRequired,
+      reply_count: PropTypes.number.isRequired,
+      retweet_count: PropTypes.number.isRequired,
+      view_count: PropTypes.number.isRequired,
+      url: PropTypes.string.isRequired,
+      user_id: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  users: PropTypes.arrayOf(
+    PropTypes.shape({
+      twitter_id: PropTypes.string.isRequired,
+      username: PropTypes.string.isRequired,
+      displayname: PropTypes.string.isRequired,
+      profile_image_url: PropTypes.string.isRequired,
+      user_id: PropTypes.string.isRequired, // Add this line
+    })
+  ).isRequired,
+};
+
+export default TablaTweets;
