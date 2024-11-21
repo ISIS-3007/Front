@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, MapPin, CalendarDays } from "lucide-react";
 
-const TablaProyecto = ({ users }) => {
+const TablaUsuarios = ({ users }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("desc");
-  const usersPerPage = 5;
+  const usersPerPage = 2;
 
   useEffect(() => {
     const sortedUsers = [...users].sort((a, b) => b.followers_count - a.followers_count);
@@ -82,7 +82,7 @@ const TablaProyecto = ({ users }) => {
               className='bg-gray-700 text-white placeholder-gray-400 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
               value={searchTerm}
               onChange={handleSearch}
-            />
+            /> 
             <Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
           </div>
         </div>
@@ -167,4 +167,4 @@ const TablaProyecto = ({ users }) => {
   );
 };
 
-export default TablaProyecto;
+export default TablaUsuarios;

@@ -26,7 +26,7 @@ function App() {
 
         <Sidebar />
         <Routes>
-          <Route path='/' element={<OverviewPage />} />
+          <Route path='/' element={<TweetsPage />} />
           <Route path='/products' element={<ProductsPage />} />
           <Route path='/users' element={<UsersPage />} />
           <Route path='/sales' element={<SalesPage />} />
@@ -34,7 +34,7 @@ function App() {
           <Route path='/analytics' element={<AnalyticsPage />} />
           <Route path='/settings' element={<SettingsPage />} />
           <Route path='/proyecto' element={<ProyectoPage />} />
-          <Route path='/tweets' element={<TweetsPage />} />
+          <Route path='/overview' element={<OverviewPage />} />
         </Routes>
       </div>
     </DataProvider>

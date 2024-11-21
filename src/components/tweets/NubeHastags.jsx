@@ -5,25 +5,13 @@ import { motion } from "framer-motion";
 const NubeHastags = ({ tweets }) => {
   let hashtags = [];
 
-  // Manejar errores al analizar JSON
+  // Extraer hashtags directamente de la lista
   try {
     hashtags = tweets.flatMap(tweet => {
-      try {
-        if (typeof tweet.hashtags === 'string') {
-          // Analizar la cadena JSON de hashtags
-          const parsedHashtags = JSON.parse(tweet.hashtags);
-          if (Array.isArray(parsedHashtags)) {
-            return parsedHashtags;
-          } else {
-            console.error('Hashtags is not an array:', parsedHashtags);
-            return [];
-          }
-        } else {
-          console.error('Hashtags is not a string:', tweet.hashtags);
-          return [];
-        }
-      } catch (error) {
-        console.error('Error parsing hashtags JSON:', error);
+      if (Array.isArray(tweet.hashtags)) {
+        return tweet.hashtags;
+      } else {
+        console.error('Hashtags is not an array:', tweet.hashtags);
         return [];
       }
     });

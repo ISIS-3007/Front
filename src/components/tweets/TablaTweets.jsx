@@ -1,19 +1,24 @@
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { motion } from "framer-motion";
-import { Search, MessageCircle, Heart, Repeat2, ChartNoAxesCombined } from "lucide-react";
+import { Search, MessageCircle, Heart, Repeat2, ChartNoAxesCombined, Angry, Smile, Meh, RefreshCcw } from "lucide-react";
 
-const TablaTweets = ({ tweets, users }) => {
+const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredTweets, setFilteredTweets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("desc");
-  const tweetsPerPage = 4;
+  const [selectedPolarity, setSelectedPolarity] = useState("all");
+  const tweetsPerPage = 3;
 
   useEffect(() => {
-    const sortedTweets = [...tweets].sort((a, b) => b.like_count - a.like_count);
+    let filtered = tweets;
+    if (selectedPolarity !== "all") {
+      filtered = tweets.filter(tweet => tweet.polarity === selectedPolarity);
+    }
+    const sortedTweets = filtered.sort((a, b) => b.like_count - a.like_count);
     setFilteredTweets(sortedTweets);
-  }, [tweets]);
+  }, [tweets, selectedPolarity]);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -39,6 +44,21 @@ const TablaTweets = ({ tweets, users }) => {
     setCurrentPage(1); // Reset to first page on sort
   };
 
+  const handlePolarityChange = (e) => {
+    setSelectedPolarity(e.target.value);
+    setCurrentPage(1); // Reset to first page on filter change
+  };
+
+  const handleReload = () => {
+    setSearchTerm("");
+    setSelectedPolarity("all");
+    setSortOrder("desc");
+    const sortedTweets = tweets.sort((a, b) => b.like_count - a.like_count);
+    setFilteredTweets(sortedTweets);
+    setFilteredUsers(users);
+    setCurrentPage(1);
+  };
+
   const indexOfLastTweet = currentPage * tweetsPerPage;
   const indexOfFirstTweet = indexOfLastTweet - tweetsPerPage;
   const currentTweets = filteredTweets.slice(indexOfFirstTweet, indexOfLastTweet);
@@ -54,12 +74,27 @@ const TablaTweets = ({ tweets, users }) => {
     }
   };
 
-  const openTweet = (url) => {
-    window.open(url, '_blank');
-  };
-
   const getUserInfo = (userId) => {
     return users.find(user => user.twitter_id === userId) || {};
+  };
+
+  const getPolarityIcon = (polarity) => {
+    if (polarity === "negative") {
+      return <Angry className="text-red-500" />;
+    } else if (polarity === "positive") {
+      return <Smile className="text-green-500" />;
+    } else {
+      return <Meh className="text-blue-500" />;
+    }
+  };
+
+  const handleTweetClick = (userId) => {
+    if (userId) {
+      const user = users.find(user => user.twitter_id === userId);
+      setFilteredUsers(user ? [user] : []);
+    } else {
+      setFilteredUsers(users);
+    }
   };
 
   return (
@@ -88,6 +123,22 @@ const TablaTweets = ({ tweets, users }) => {
             />
             <Search className='absolute left-3 top-2.5 text-gray-400' size={18} />
           </div>
+          <select
+            value={selectedPolarity}
+            onChange={handlePolarityChange}
+            className='bg-gray-700 text-white rounded-lg px-3 py-2 ml-4 focus:outline-none focus:ring-2 focus:ring-blue-500'
+          >
+            <option value="all">All</option>
+            <option value="positive">Positive</option>
+            <option value="neutral">Neutral</option>
+            <option value="negative">Negative</option>
+          </select>
+          <button
+            className='bg-gray-700 text-white rounded-lg px-3 py-2 ml-4 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            onClick={handleReload}
+          >
+            <RefreshCcw size={18} />
+          </button>
         </div>
       </div>
 
@@ -97,17 +148,23 @@ const TablaTweets = ({ tweets, users }) => {
           return (
             <motion.div
               key={tweet.tweet_id}
-              className='bg-gray-700 p-4 rounded-lg mb-4 cursor-pointer'
+              className='bg-gray-700 p-4 rounded-lg mb-4 cursor-pointer relative'
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
               whileHover={{ y: -5, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
-              onClick={() => openTweet(tweet.url)}
+              onClick={() => handleTweetClick(tweet.user_id)}
             >
+              <div className="absolute top-2 right-2">
+                {getPolarityIcon(tweet.polarity)}
+              </div>
               <div className='flex items-center mb-2'>
                 <img src={user.profile_image_url} alt={user.username} className='w-10 h-10 rounded-full mr-3' />
-                <div>
-                  <div className='text-sm font-medium text-gray-100'>{user.displayname}</div>
+                <div className='flex-1'>
+                  <div className='text-sm font-medium text-gray-100'>
+                    {user.displayname}
+                    <a href={tweet.url} target="_blank" rel="noopener noreferrer" className='text-xs text-blue-500 ml-2'>Visitar</a>
+                  </div>
                   <div className='text-xs text-gray-400'>@{user.username}</div>
                 </div>
               </div>

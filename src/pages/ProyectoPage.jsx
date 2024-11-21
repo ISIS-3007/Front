@@ -5,9 +5,10 @@ import CrecimientoUsuario from "../components/proyecto/CrecimientoUsuario";
 import DemografiaUsuarios from "../components/proyecto/DemografiaUsuarios";
 import ActividadUsuario from "../components/proyecto/ActividadUsuario";
 import { DataContext } from '../DataContext';
+import FechasCreacionCuentas from '../components/proyecto/FechasCreacionCuentas';
 
 const ProyectoPage = () => {
-	const { tweets, users, loading } = useContext(DataContext);
+	const { users, loading } = useContext(DataContext);
 
 	if (loading) {
 		return <div>Loading...</div>;
@@ -20,6 +21,7 @@ const ProyectoPage = () => {
 				{/* STATS */}
 				<TablaProyecto users={users} />
 				<br />
+				<FechasCreacionCuentas users={users} />
                 
 				{/* USER CHARTS */}
 				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
