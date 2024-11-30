@@ -10,6 +10,9 @@ const TweetsPorFecha = ({ tweets }) => {
   const handleYearChange = (e) => setSelectedYear(parseInt(e.target.value));
   const handleMonthChange = (e) => setSelectedMonth(parseInt(e.target.value));
 
+  const years = [...new Set(tweets.map(tweet => new Date(tweet.date).getFullYear()))];
+  const months = [...new Set(tweets.filter(tweet => new Date(tweet.date).getFullYear() === selectedYear).map(tweet => new Date(tweet.date).getMonth() + 1))];
+
   const filteredTweets = tweets.filter(tweet => {
     const tweetDate = new Date(tweet.date);
     return tweetDate.getFullYear() === selectedYear && (tweetDate.getMonth() + 1) === selectedMonth;
@@ -39,13 +42,13 @@ const TweetsPorFecha = ({ tweets }) => {
         <div className='flex items-center'>
           <label className='text-gray-100 mr-2'>Mes:</label>
           <select value={selectedMonth} onChange={handleMonthChange} className='bg-gray-700 text-gray-100 p-2 rounded mr-4'>
-            {["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].map((month, index) => (
-              <option key={index} value={index + 1}>{month}</option>
+            {months.map(month => (
+              <option key={month} value={month}>{["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][month - 1]}</option>
             ))}
           </select>
           <label className='text-gray-100 mr-2'>Año:</label>
           <select value={selectedYear} onChange={handleYearChange} className='bg-gray-700 text-gray-100 p-2 rounded'>
-            {[2022, 2023, 2024].map(year => (
+            {years.map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
@@ -55,7 +58,7 @@ const TweetsPorFecha = ({ tweets }) => {
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray='3 3' stroke='#374151' />
-            <XAxis dataKey='day' stroke='#9CA3AF' tick={{ angle: 0, textAnchor: 'end' }} interval={0} label={{ value: 'Día', position: 'insideBottomCenter', offset: 50, fill: '#9CA3AF' }} />
+            <XAxis dataKey='day' stroke='#9CA3AF' tick={{ angle: 0, textAnchor: 'end' }} interval={0} label={{ value: 'Día', position: 'insideBottom', offset: -5, fill:'#9CA3AF' }} />
             <YAxis stroke='#9CA3AF' label={{ value: '# Tweets', angle: -90, position: 'insideLeft', fill: '#9CA3AF' }} />
             <Tooltip
               contentStyle={{
@@ -66,6 +69,7 @@ const TweetsPorFecha = ({ tweets }) => {
               formatter={(value) => `${value}`}
               labelFormatter={(label) => `Fecha: ${chartData.find(item => item.day === label).fullDate}`}
             />
+            {/* <Legend verticalAlign="top" height={36} /> */}
             <Bar
               dataKey='count'
               name='Tweets'

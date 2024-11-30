@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { motion } from "framer-motion";
@@ -9,7 +10,7 @@ const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortOrder, setSortOrder] = useState("desc");
   const [selectedPolarity, setSelectedPolarity] = useState("all");
-  const tweetsPerPage = 3;
+  const tweetsPerPage = 4;
 
   useEffect(() => {
     let filtered = tweets;
@@ -28,7 +29,7 @@ const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
     );
     const sortedFiltered = filtered.sort((a, b) => sortOrder === "asc" ? a.like_count - b.like_count : b.like_count - a.like_count);
     setFilteredTweets(sortedFiltered);
-    setCurrentPage(1); // Reset to first page on search
+    setCurrentPage(1); 
   };
 
   const handleSort = (order) => {
@@ -41,12 +42,12 @@ const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
     });
     setFilteredTweets(sortedTweets);
     setSortOrder(order);
-    setCurrentPage(1); // Reset to first page on sort
+    setCurrentPage(1);
   };
 
   const handlePolarityChange = (e) => {
     setSelectedPolarity(e.target.value);
-    setCurrentPage(1); // Reset to first page on filter change
+    setCurrentPage(1); 
   };
 
   const handleReload = () => {
@@ -228,7 +229,7 @@ TablaTweets.propTypes = {
       username: PropTypes.string.isRequired,
       displayname: PropTypes.string.isRequired,
       profile_image_url: PropTypes.string.isRequired,
-      user_id: PropTypes.string.isRequired, // Add this line
+      user_id: PropTypes.string.isRequired, 
     })
   ).isRequired,
 };
