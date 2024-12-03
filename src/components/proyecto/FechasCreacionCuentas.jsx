@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { motion } from "framer-motion";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const FechasCreacionCuentas = ({ users }) => {
   const data = users.reduce((acc, user) => {
@@ -26,7 +26,7 @@ const FechasCreacionCuentas = ({ users }) => {
         <ResponsiveContainer width='100%' height='100%'>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray='3 3' stroke='#374151' />
-            <XAxis dataKey='year' stroke='#9CA3AF' label={{ value: 'Año', position: 'insideBottomCenter', offset: -5, fill: '#9CA3AF' }} />
+            <XAxis dataKey='year' stroke='#9CA3AF' label={{ value: 'Año', position: 'insideBottom', offset: -5, fill: '#9CA3AF' }} />
             <YAxis stroke='#9CA3AF' label={{ value: '# Cuentas', angle: -90, position: 'insideLeft', fill: '#9CA3AF' }} />
             <Tooltip
               contentStyle={{
@@ -37,7 +37,6 @@ const FechasCreacionCuentas = ({ users }) => {
               formatter={(value) => `${value}`}
               labelFormatter={(label) => `Año: ${label}`}
             />
-            <Legend />
             <Bar
               dataKey='count'
               name='Cuentas'

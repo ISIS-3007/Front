@@ -1,14 +1,14 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { motion } from "framer-motion";
 
-const TweetsPorFecha = ({ tweets }) => {
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+const TweetsPorFecha = ({ tweets, onDateSelect }) => {
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
 
-  const handleYearChange = (e) => setSelectedYear(parseInt(e.target.value));
-  const handleMonthChange = (e) => setSelectedMonth(parseInt(e.target.value));
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
   const years = [...new Set(tweets.map(tweet => new Date(tweet.date).getFullYear()))];
   const months = [...new Set(tweets.filter(tweet => new Date(tweet.date).getFullYear() === selectedYear).map(tweet => new Date(tweet.date).getMonth() + 1))];
@@ -30,6 +30,27 @@ const TweetsPorFecha = ({ tweets }) => {
 
   const chartData = Object.values(data).sort((a, b) => new Date(a.fullDate) - new Date(b.fullDate));
 
+  const handleYearChange = (e) => {
+    setSelectedYear(parseInt(e.target.value));
+    setSelectedMonth(1); // Reset month to January when year changes
+  };
+
+  const handleMonthChange = (e) => {
+    setSelectedMonth(parseInt(e.target.value));
+  };
+
+  useEffect(() => {
+    // Ensure the selected month is valid for the selected year
+    if (!months.includes(selectedMonth)) {
+      setSelectedMonth(months[0] || currentMonth);
+    }
+  }, [selectedYear, months, currentMonth]);
+
+  const handleBarClick = (data) => {
+    const selectedDate = new Date(selectedYear, selectedMonth - 1, data.day);
+    onDateSelect(selectedDate);
+  };
+
   return (
     <motion.div
       className='bg-gray-800 bg-opacity-50 backdrop-blur-md shadow-lg rounded-xl p-6 border border-gray-700'
@@ -40,45 +61,37 @@ const TweetsPorFecha = ({ tweets }) => {
       <div className='flex justify-between items-center mb-4'>
         <h2 className='text-xl font-semibold text-gray-100'>Tweets por Día</h2>
         <div className='flex items-center'>
-          <label className='text-gray-100 mr-2'>Mes:</label>
-          <select value={selectedMonth} onChange={handleMonthChange} className='bg-gray-700 text-gray-100 p-2 rounded mr-4'>
-            {months.map(month => (
-              <option key={month} value={month}>{["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][month - 1]}</option>
-            ))}
-          </select>
           <label className='text-gray-100 mr-2'>Año:</label>
-          <select value={selectedYear} onChange={handleYearChange} className='bg-gray-700 text-gray-100 p-2 rounded'>
+          <select value={selectedYear} onChange={handleYearChange} className='bg-gray-700 text-gray-100 p-2 rounded mr-4'>
             {years.map(year => (
               <option key={year} value={year}>{year}</option>
             ))}
           </select>
+          <label className='text-gray-100 mr-2'>Mes:</label>
+          <select value={selectedMonth} onChange={handleMonthChange} className='bg-gray-700 text-gray-100 p-2 rounded'>
+            {months.map(month => (
+              <option key={month} value={month}>{["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][month - 1]}</option>
+            ))}
+          </select>
         </div>
       </div>
-      <div className='h-[320px]'>
-        <ResponsiveContainer width='100%' height='100%'>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray='3 3' stroke='#374151' />
-            <XAxis dataKey='day' stroke='#9CA3AF' tick={{ angle: 0, textAnchor: 'end' }} interval={0} label={{ value: 'Día', position: 'insideBottom', offset: -5, fill:'#9CA3AF' }} />
-            <YAxis stroke='#9CA3AF' label={{ value: '# Tweets', angle: -90, position: 'insideLeft', fill: '#9CA3AF' }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "rgba(31, 41, 55, 0.8)",
-                borderColor: "#4B5563",
-              }}
-              itemStyle={{ color: "#E5E7EB" }}
-              formatter={(value) => `${value}`}
-              labelFormatter={(label) => `Fecha: ${chartData.find(item => item.day === label).fullDate}`}
-            />
-            {/* <Legend verticalAlign="top" height={36} /> */}
-            <Bar
-              dataKey='count'
-              name='Tweets'
-              fill='#8B5CF6'
-              barSize={30}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <ResponsiveContainer width="100%" height={400}>
+        <BarChart data={chartData} onClick={(data) => handleBarClick(data.activePayload[0].payload)}>
+          <CartesianGrid strokeDasharray='3 3' stroke='#374151' />
+          <XAxis dataKey="day" stroke='#9CA3AF' label={{ value: 'Día', position: 'insideBottom', offset: -5, fill: '#9CA3AF' }} />
+          <YAxis stroke='#9CA3AF' label={{ value: '# Tweets', angle: -90, position: 'insideLeft', fill: '#9CA3AF' }} />
+          <Tooltip 
+            contentStyle={{ backgroundColor: "rgba(31, 41, 55, 0.8)", borderColor: "#4B5563" }}
+            labelStyle={{ color: '#fff' }}
+            itemStyle={{ color: '#E5E7EB' }}
+            labelFormatter={(label) => {
+              const item = chartData.find(d => d.day === label);
+              return item ? item.fullDate : '';
+            }} 
+          />
+          <Bar dataKey="count" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
     </motion.div>
   );
 };

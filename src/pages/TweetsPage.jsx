@@ -14,6 +14,7 @@ import { DataContext } from '../DataContext';
 const TweetsPage = () => {
   const { tweets, users, loading } = useContext(DataContext);
   const [filteredUsers, setFilteredUsers] = useState(users);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     setFilteredUsers(users);
@@ -36,6 +37,14 @@ const TweetsPage = () => {
     user_id: tweet.user_id ?? tweet.user, // Ensure user_id is set
   }));
 
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+  };
+
+  const resetDate = () => {
+    setSelectedDate(null);
+  };
+
   return (
     <div className='flex-1 overflow-auto relative z-10'>
       <Header title='Tweets' />
@@ -43,21 +52,21 @@ const TweetsPage = () => {
       <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
         {/* STATS */}
         <motion.div
-					className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8'
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 1 }}
-				>
-					<StatCard name='Post totales' icon={ TrendingUp } value={totalPosts} color='#22C55E' />
-					<StatCard name='Post positivos' icon={ Smile } value={positivePosts} color='#22C55E' />
-					<StatCard name='Post negativos' icon={ Angry } value={negativePosts} color='#EF4444' />
-					<StatCard name='Post neutrales' icon={ Meh } value={neutralPosts} color='#3B82F6' />
-				</motion.div>
+          className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8'
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <StatCard name='Post totales' icon={TrendingUp} value={totalPosts} color='#22C55E' />
+          <StatCard name='Post positivos' icon={Smile} value={positivePosts} color='#22C55E' />
+          <StatCard name='Post negativos' icon={Angry} value={negativePosts} color='#EF4444' />
+          <StatCard name='Post neutrales' icon={Meh} value={neutralPosts} color='#3B82F6' />
+        </motion.div>
 
-        <TweetsPorFecha tweets={mappedTweets} />
+        <TweetsPorFecha tweets={mappedTweets} onDateSelect={handleDateSelect} />
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6'>
           <div className='space-y-6'>
-            <TablaTweets tweets={mappedTweets} users={users} setFilteredUsers={setFilteredUsers} />
+            <TablaTweets tweets={mappedTweets} users={users} setFilteredUsers={setFilteredUsers} selectedDate={selectedDate} resetDate={resetDate} />
           </div>
           <div className='space-y-6'>
             <TablaUsuarios users={filteredUsers} />

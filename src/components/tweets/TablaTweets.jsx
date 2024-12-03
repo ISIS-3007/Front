@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { motion } from "framer-motion";
 import { Search, MessageCircle, Heart, Repeat2, ChartNoAxesCombined, Angry, Smile, Meh, RefreshCcw } from "lucide-react";
 
-const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
+const TablaTweets = ({ tweets, users, setFilteredUsers, selectedDate, resetDate }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredTweets, setFilteredTweets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -17,9 +17,15 @@ const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
     if (selectedPolarity !== "all") {
       filtered = tweets.filter(tweet => tweet.polarity === selectedPolarity);
     }
+    if (selectedDate) {
+      filtered = filtered.filter(tweet => {
+        const tweetDate = new Date(tweet.date);
+        return tweetDate.toDateString() === selectedDate.toDateString();
+      });
+    }
     const sortedTweets = filtered.sort((a, b) => b.like_count - a.like_count);
     setFilteredTweets(sortedTweets);
-  }, [tweets, selectedPolarity]);
+  }, [tweets, selectedPolarity, selectedDate]);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -58,6 +64,7 @@ const TablaTweets = ({ tweets, users, setFilteredUsers }) => {
     setFilteredTweets(sortedTweets);
     setFilteredUsers(users);
     setCurrentPage(1);
+    resetDate(); // Reset the selected date
   };
 
   const indexOfLastTweet = currentPage * tweetsPerPage;
@@ -232,6 +239,8 @@ TablaTweets.propTypes = {
       user_id: PropTypes.string.isRequired, 
     })
   ).isRequired,
+  selectedDate: PropTypes.instanceOf(Date),
+  resetDate: PropTypes.func.isRequired,
 };
 
 export default TablaTweets;
