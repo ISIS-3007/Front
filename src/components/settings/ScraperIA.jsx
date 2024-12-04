@@ -1,30 +1,56 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SettingSection from "./SettingSection";
 import ToggleSwitch from "./ToggleSwitch";
 import { Cpu } from "lucide-react";
 
 const ScraperIA = () => {
   const [activeIA, setActiveIA] = useState("");
+  const [strategies, setStrategies] = useState([]);
+
+  useEffect(() => {
+    const fetchActiveIA = async () => {
+      try {
+        const response = await fetch("http://167.114.144.233:8000/api/strategies/");
+        if (response.ok) {
+          const data = await response.json();
+          setStrategies(data);
+          const activeStrategy = data.find(strategy => strategy.is_active);
+          if (activeStrategy) {
+            setActiveIA(activeStrategy.name === "openai" ? "ChatGPT" : activeStrategy.name.charAt(0).toUpperCase() + activeStrategy.name.slice(1));
+          }
+        } else {
+          console.error("Failed to fetch active IA.");
+        }
+      } catch (error) {
+        console.error("Error fetching active IA:", error);
+      }
+    };
+
+    fetchActiveIA();
+  }, []);
 
   const handleToggle = (ia) => {
     setActiveIA(activeIA === ia ? "" : ia);
   };
 
   const handleSubmit = async () => {
-    const strategies = [
-      { name: "openai", is_active: activeIA === "ChatGPT" },
-      { name: "claude", is_active: activeIA === "Claude" },
-      { name: "gemini", is_active: activeIA === "Gemini" },
-    ];
+    const strategyMap = strategies.reduce((map, strategy) => {
+      map[strategy.name.charAt(0).toUpperCase() + strategy.name.slice(1)] = strategy.name;
+      return map;
+    }, {});
+
+    const dataToSend = {
+      strategy: strategyMap[activeIA],
+    };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/strategies/", {
+      const response = await fetch("http://167.114.144.233:8000/api/strategies/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(strategies),
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {

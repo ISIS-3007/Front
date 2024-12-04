@@ -54,7 +54,7 @@ const ScraperProxies = () => {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/scraper/proxies/", {
+      const response = await fetch("http://167.114.144.233:8000/scraper/proxies/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

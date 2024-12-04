@@ -13,6 +13,7 @@ const ScraperQuery = () => {
     limit: false,
   });
   const [showErrorMessage, setShowErrorMessage] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +29,8 @@ const ScraperQuery = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsButtonDisabled(true); // Disable the button immediately
+
     const isFormValid = formData.query && formData.limit;
 
     if (!isFormValid) {
@@ -36,6 +39,7 @@ const ScraperQuery = () => {
         limit: !formData.limit,
       });
       setShowErrorMessage(true);
+      setIsButtonDisabled(false); // Re-enable the button if the form is not valid
       return;
     }
 
@@ -45,7 +49,7 @@ const ScraperQuery = () => {
     };
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/scraper/scrape/", {
+      const response = await fetch("http://167.114.144.233:8000/scraper/scrape/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,6 +70,10 @@ const ScraperQuery = () => {
     } catch (error) {
       console.error("Error sending query:", error);
       alert("An error occurred while sending the query.");
+    } finally {
+      setTimeout(() => {
+        setIsButtonDisabled(false);
+      }, 120000); // 2 minutes in milliseconds
     }
   };
 
@@ -108,8 +116,9 @@ const ScraperQuery = () => {
         <button
           type="submit"
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+          disabled={isButtonDisabled}
         >
-          Send Query
+          {isButtonDisabled ? "Please wait..." : "Send Query"}
         </button>
       </form>
     </SettingSection>
