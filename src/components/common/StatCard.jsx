@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { motion } from "framer-motion";
 
 const StatCard = ({ name, icon: Icon, value, color }) => {
